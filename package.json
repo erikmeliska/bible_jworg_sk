@@ -9,10 +9,13 @@
   },
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning scraper.js",
-    "test": "node --test"
+    "test": "node --test",
+    "import": "node --disable-warning=ExperimentalWarning import-pg.js",
+    "check": "node check-alignment.js"
   },
   "dependencies": {
-    "cheerio": "1.2.0"
+    "cheerio": "1.2.0",
+    "pg": "8.23.1"
   },
   "keywords": [
     "scraper",

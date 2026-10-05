@@ -20,25 +20,40 @@ const only = process.argv.slice(2).map(Number);
 const books = parseBooks(await fetchHtml(`${BASE}/binav/${PUB}`));
 if (books.length !== 66) throw new Error(`Expected 66 books, found ${books.length}`);
 
-let failed = 0;
-for (const book of books) {
-	if (only.length && !only.includes(book.num)) continue;
+const selected = books.filter((b) => !only.length || only.includes(b.num));
 
+// Chapter counts first, so the total is known and progress can be shown
+for (const [i, book] of selected.entries()) {
 	book.chapters = parseChapterCount(await fetchHtml(`${BASE}/binav/${PUB}/nwt/${book.num}`), book.num);
 	saveBook(db, book);
-	console.log(`${book.num}. ${book.name} (${book.chapters} kap.)`);
+	process.stdout.write(`\rZoznam kapitol: ${i + 1}/${selected.length} kníh`);
+}
+console.log();
 
-	for (let ch = 1; ch <= book.chapters; ch++) {
-		if (!force && hasChapter(db, book.num, ch)) continue;
-		try {
-			const verses = parseChapter(await fetchHtml(`${BASE}/b/${PUB}/nwt/${book.num}/${ch}`), book.num, ch);
-			if (!verses.some((v) => v.verse === 1)) throw new Error("no verses parsed");
-			saveChapter(db, book.num, ch, verses);
-			console.log(`  ${book.code} ${ch}: ${verses.length} veršov`);
-		} catch (err) {
-			failed++;
-			console.error(`  ${book.code} ${ch}: CHYBA ${err.message}`);
-		}
+const todo = selected.flatMap((book) =>
+	Array.from({ length: book.chapters }, (_, i) => ({ book, chapter: i + 1 })).filter(
+		({ chapter }) => force || !hasChapter(db, book.num, chapter),
+	),
+);
+const total = selected.reduce((sum, b) => sum + b.chapters, 0);
+console.log(`Kapitol spolu: ${total}, už stiahnutých: ${total - todo.length}, zostáva: ${todo.length}`);
+
+const started = Date.now();
+let failed = 0;
+const progress = (done) => {
+	const eta = Math.round((((Date.now() - started) / done) * (todo.length - done)) / 60000);
+	const pct = ((done / todo.length) * 100).toFixed(1).padStart(5);
+	return `[${String(done).padStart(String(todo.length).length)}/${todo.length} ${pct}% | ešte ~${eta} min]`;
+};
+for (const [i, { book, chapter }] of todo.entries()) {
+	try {
+		const verses = parseChapter(await fetchHtml(`${BASE}/b/${PUB}/nwt/${book.num}/${chapter}`), book.num, chapter);
+		if (!verses.some((v) => v.verse === 1)) throw new Error("no verses parsed");
+		saveChapter(db, book.num, chapter, verses);
+		console.log(`${progress(i + 1)} ${book.code} ${chapter}: ${verses.length} veršov`);
+	} catch (err) {
+		failed++;
+		console.error(`${progress(i + 1)} ${book.code} ${chapter}: CHYBA ${err.message}`);
 	}
 }
 
