@@ -48,7 +48,7 @@ const progress = (done) => {
 for (const [i, { book, chapter }] of todo.entries()) {
 	try {
 		const verses = parseChapter(await fetchHtml(`${BASE}/b/${PUB}/nwt/${book.num}/${chapter}`), book.num, chapter);
-		if (!verses.some((v) => v.verse === 1)) throw new Error("no verses parsed");
+		if (!verses.length) throw new Error("no verses parsed");
 		saveChapter(db, book.num, chapter, verses);
 		console.log(`${progress(i + 1)} ${book.code} ${chapter}: ${verses.length} veršov`);
 	} catch (err) {

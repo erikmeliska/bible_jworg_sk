@@ -1,2 +1,11 @@
 # NWT -> ep (krestan primary translation) mappings on top of eng.vrs.
 # Same format as eng.vrs: NWT reference = ep reference.
+#
+# Verified against ep, sevp, cep, b21 and rkc in krestan_v2 with check-alignment.js.
+# English 1 Sam 20:42 = Hebrew 20:42 + 21:1; all translations in the DB keep it in 20:42.
+1SA 20:42 = 1SA 20:42
+# All translations in the DB merge English Acts 19:40-41 into 19:40.
+ACT 19:40-41 = ACT 19:40
+# NWT follows KJV here (13:12-13 is one verse in the Greek text): ep, sevp, cep, rkc have 13 verses.
+2CO 13:12-13 = 2CO 13:12
+2CO 13:14 = 2CO 13:13
