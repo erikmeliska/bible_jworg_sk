@@ -1,10 +1,21 @@
 {
-  "version": "0.0.1",
+  "name": "bible_jworg_sk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "main": "scraper.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning scraper.js",
+    "test": "node --test",
+    "import": "node --disable-warning=ExperimentalWarning import-pg.js",
+    "check": "node check-alignment.js"
+  },
   "dependencies": {
-    "cheerio": "latest",
-    "request": "latest",
-    "sqlite3": "latest"
+    "cheerio": "1.2.0",
+    "pg": "8.23.1"
   },
   "keywords": [
     "scraper",
